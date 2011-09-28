@@ -1,0 +1,67 @@
+/* grid container
+============================================== */
+.container-12 {
+  width: 960px;
+  margin: 0 auto 10px auto;
+  position: relative; }
+  .container-12:after {
+    content: ".";
+    display: block;
+    height: 0;
+    clear: both;
+    visibility: hidden; }
+
+/* grid divisions
+============================================== */
+.grid-1,
+.grid-2,
+.grid-3,
+.grid-4,
+.grid-5,
+.grid-6,
+.grid-7,
+.grid-8,
+.grid-9,
+.grid-10,
+.grid-11,
+.grid-12 {
+  margin: 0 5px;
+  padding: 0;
+  display: inline;
+  float: left; }
+
+.grid-1 {
+  width: 70px; }
+
+.grid-2 {
+  width: 150px; }
+
+.grid-3 {
+  width: 230px; }
+
+.grid-4 {
+  width: 310px; }
+
+.grid-5 {
+  width: 390px; }
+
+.grid-6 {
+  width: 470px; }
+
+.grid-7 {
+  width: 550px; }
+
+.grid-8 {
+  width: 630px; }
+
+.grid-9 {
+  width: 710px; }
+
+.grid-10 {
+  width: 790px; }
+
+.grid-11 {
+  width: 870px; }
+
+.grid-12 {
+  width: 950px; }

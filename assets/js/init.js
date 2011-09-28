@@ -1,0 +1,3 @@
+$(function() {
+  $('.sticky').sticky();
+});
