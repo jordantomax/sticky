@@ -14,12 +14,17 @@
 
     var defaults = {
       delay: 25,
+      top: 20,
     };
     var options = $.extend(defaults, options);
 
     var didScroll = false;
-    var css = {
+    var stickyCss = {
       position: "fixed",
+      top: defaults.top,
+    }
+    var unstickyCss = {
+      position: "static",
     }
 
     $(window).scroll(function() {
@@ -37,14 +42,16 @@
 
       // ...and its distance from document top
       var fromTop = sticky.offset().top;
+      console.log(fromTop);
 
       setInterval(function() {
         if (didScroll) {
           didScroll = false;
-          if (fromTop <= $(document).scrollTop()) {
-            sticky.css(css).css({width: width});
+          if (fromTop <= $(document).scrollTop() + defaults.top) {
+            sticky.css(stickyCss).css({width: width});
           }
           else {
+            sticky.css(unstickyCss)
           }
         }
       }, defaults.delay);
