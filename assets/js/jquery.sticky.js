@@ -17,8 +17,10 @@
     };
     var options = $.extend(defaults, options);
 
-
     var didScroll = false;
+    var css = {
+      position: "fixed",
+    }
 
     $(window).scroll(function() {
       didScroll = true;
@@ -30,14 +32,17 @@
       // get the sticky element
       var sticky = $(element);
 
-      // ...and it's distance from document top
+      // ...and its width
+      var width = sticky.parent().width();
+
+      // ...and its distance from document top
       var fromTop = sticky.offset().top;
 
       setInterval(function() {
         if (didScroll) {
           didScroll = false;
           if (fromTop <= $(document).scrollTop()) {
-
+            sticky.css(css).css({width: width});
           }
           else {
           }
