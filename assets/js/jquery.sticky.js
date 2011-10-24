@@ -13,48 +13,83 @@
   $.fn.sticky = function(options) {
 
     var defaults = {
-      delay: 25,
+      delay: 300,
       top: 20,
+      buffer: 1000, // the distance beyond the element in question to act
+      zIndex: 1000,
+      left: "auto",
+      position: "static",
+      width: "",
+      stackOrder: 1,
     };
     var options = $.extend(defaults, options);
 
-    var didScroll = false;
     var stickyCss = {
       position: "fixed",
       top: defaults.top,
+      left: defaults.left,
+      zIndex: defaults.zIndex,
+      width: defaults.width,
     }
     var unstickyCss = {
-      position: "static",
+        position: defaults.position,
     }
+
+    var didScroll = false;
 
     $(window).scroll(function() {
       didScroll = true;
     });
 
+
     return this.each(function() {
-      var element = $(this);
+        var element = $(this),
 
-      // get the sticky element
-      var sticky = $(element);
+            // get the sticky element
+            sticky = $(element),
 
-      // ...and its width
-      var width = sticky.parent().width();
+            // clone it
+            clone = sticky.clone(),
 
-      // ...and its distance from document top
-      var fromTop = sticky.offset().top;
-      console.log(fromTop);
+            // ...and its width
+            width = sticky.parent().width(),
 
-      setInterval(function() {
-        if (didScroll) {
-          didScroll = false;
-          if (fromTop <= $(document).scrollTop() + defaults.top) {
-            sticky.css(stickyCss).css({width: width});
-          }
-          else {
-            sticky.css(unstickyCss)
-          }
-        }
-      }, defaults.delay);
-    });
+            // ...and its distance from document top
+            fromTop = sticky.offset().top,
+
+            isVisible = false;
+
+            clone.appendTo(sticky).css({width: width}).css(stickyCss).hide();
+
+            if ( (fromTop + defaults.buffer <= $(document).scrollTop() + defaults.top) ) {
+                if (isVisible == false) {
+                    isVisible = true;
+                    clone
+                        .show();
+                }
+
+            }
+
+        setInterval(function() {
+
+            if (didScroll) {
+                didScroll = false;
+                if ( (fromTop + defaults.buffer <= $(document).scrollTop() + defaults.top) ) {
+                    if (isVisible == false) {
+                        isVisible = true;
+                        clone.slideToggle("fast");
+                    }
+                }
+
+                else {
+                    if (isVisible == true) {
+
+                        isVisible = false;
+                        clone.slideToggle("fast");
+                    }
+                }
+            }
+            }, defaults.delay);
+        });
   }
 })(jQuery);
