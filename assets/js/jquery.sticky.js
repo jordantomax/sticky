@@ -1,12 +1,17 @@
 /*
- * jQuery Sticky version 0.1
+ * jQuery Sticky version 0.2
  * https://github.com/jordancooperman/sticky
+ *
+ * author: Jordan Cooperman
+ * email: jordancooperman@gmail.com
+ * twitter: @jordancooperman
  *
  * Copyright 2011, Jordan Cooperman
  * Free to use under the MIT license.
  * http://www.opensource.org/licenses/mit-license.php
  *
  */
+
 (function($){
 
     var
@@ -25,8 +30,8 @@
     /* HELPER METHODS
     =========================== */
 
-	// Convience function for creating new jQuery objects
-	// Extracted from jquery.colorbox.js, jack@colorpowered.com
+	// convience function for creating new jQuery objects
+	// adapted from jquery.colorbox.js, jack@colorpowered.com
     function $tag( tag, id, css ) {
         var element = document.createElement(tag);
 
