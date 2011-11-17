@@ -19,10 +19,6 @@
     // of all sticky elements
     stickiesHeight = 0,
 
-    // check if sticky element
-    // is visible on page load
-    isVisible = false,
-
     // variables for cached values
     prefix = 'sticky',
     div = 'div';
