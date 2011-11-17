@@ -1,95 +1,195 @@
 /*
  * jQuery Sticky version 0.1
- * https://github.com/jordancooperman/Sticky
+ * https://github.com/jordancooperman/sticky
  *
  * Copyright 2011, Jordan Cooperman
  * Free to use under the MIT license.
  * http://www.opensource.org/licenses/mit-license.php
  *
  */
+(function($){
 
-(function($) {
+    var
+    // keeps track of the height
+    // of all sticky elements
+    stickiesHeight = 0,
 
-  $.fn.sticky = function(options) {
+    // check if sticky element
+    // is visible on page load
+    isVisible = false,
 
-    var defaults = {
-      delay: 300,
-      top: 20,
-      buffer: 1000, // the distance beyond the element in question to act
-      zIndex: 1000,
-      left: "auto",
-      position: "static",
-      width: "",
-      stackOrder: 1,
+    // variables for cached values
+    prefix = 'sticky',
+    div = 'div';
+
+    /* HELPER METHODS
+    =========================== */
+
+	// Convience function for creating new jQuery objects
+	// Extracted from jquery.colorbox.js, jack@colorpowered.com
+    function $tag( tag, id, css ) {
+        var element = document.createElement(tag);
+
+        if (id) {
+            element.id = prefix + id;
+        }
+
+        if (css) {
+            $(element).css(css);
+        }
+
+        return $(element);
+    }
+
+    // convenience function for wrapping elements
+    function wrapElement( element, css ) {
+        var $wrapper = $tag(div, '-wrapper', css);
+
+        $(element).before($wrapper);
+        $(element).appendTo($wrapper);
+    }
+
+
+    /* PUBLIC METHODS
+    =========================== */
+
+    var methods = {
+
+        init: function( options ) {
+            var self = this;
+
+            return this.each(function(i) {
+                var
+                $this = $(this),
+                data = $this.data('sticky'),
+                sticky = {
+                    offset: $this.offset().top,
+                    height: $this.height(),
+                    topCatch: 0
+                },
+
+                // default settings
+                defaults = {
+                    stickyCss: {
+                        top: 0,
+                        position: "fixed",
+                        width: $this.width(),
+                        bottom: 'auto',
+                        zIndex: 1000
+                    },
+                    unstickyCss: {
+                        position: "static"
+                    },
+                    absolute: false,
+                    anchored: false,
+                    anchoredTo: '.sticky-blockade',
+                    inFlow: true,
+                    fullWidth: false,
+                };
+                var settings = $.extend( true, {}, defaults, options );
+
+                // if the plugin has not been initializated
+                if ( ! data ) {
+
+                    $this.data('sticky', {
+                        target : $this,
+                        sticky : sticky,
+                        settings : settings
+                    });
+                }
+
+                // set where our sticky elements will catch
+                $this.data('sticky').sticky.topCatch = stickiesHeight;
+                stickiesHeight += $this.data('sticky').sticky.height;
+
+                // add wrapper with the height of our element
+                // to prevent the page from jumping when we
+                // fix the element's position
+                if ( settings.inFlow == true ) {
+                    wrapElement( this, {
+                        height: $this.height()
+                    });
+
+                // add wrapper with same top position of our element
+                // to keep a reference to the top offset
+                // in case it changes
+                } else if (  settings.absolute == true ) {
+                    wrapElement( this, {
+                        position: "absolute",
+                        top: $this.css('top')
+                    });
+                    $this.css('top', '0');
+                }
+
+                // in case the page loads below
+                // our topCatch, update once initialized
+                methods.update.apply( self );
+            });
+
+        },
+        update: function() {
+
+            return this.each(function() {
+
+                var $this = $(this),
+                    data = $this.data('sticky'),
+                    sticky = data.sticky,
+                    settings = data.settings;
+
+                // if a sticky element in the flow changes size
+                // recalculate the offset of absolutely positioned sticky elements
+                if ( $this.parent().offset().top != sticky.offset ) {
+                    sticky.offset = $this.parent().offset().top;
+                }
+
+                // if we scroll to the topCatch of our sticky elements
+                if ( sticky.offset - sticky.topCatch - settings.stickyCss.top <= $(document).scrollTop() ) {
+
+                    $this.css( settings.stickyCss ).css( 'top', sticky.topCatch + settings.stickyCss.top );
+
+                    if ( settings.fullWidth == true ) {
+                        $this.css( "width", "100%" );
+                    }
+
+                    if ( settings.anchored == true && $this.height() + settings.stickyCss.top + sticky.topCatch + $(document).scrollTop() >= $(settings.anchoredTo).offset().top ) {
+                        $this.addClass('anchored');
+                        $this.parent().css({
+                            height: "100%"
+                        });
+                        $this.css(settings.unstickyCss);
+                        $this.css({
+                            position: "absolute",
+                            bottom: 15,
+                            top: "auto",
+                            zIndex: 999,
+                        });
+
+                    } else if (settings.anchored == true && $this.hasClass('anchored')) {
+                        $this.removeClass('anchored');
+                        $this.css(settings.stickyCss).css( 'top', sticky.topCatch + settings.stickyCss.top );
+                        $this.parent().css({
+                            height: "auto"
+                        })
+
+                    }
+
+                } else {
+                    $this.css( data.settings.unstickyCss );
+                }
+
+            })
+        }
     };
-    var options = $.extend(defaults, options);
 
-    var stickyCss = {
-      position: "fixed",
-      top: defaults.top,
-      left: defaults.left,
-      zIndex: defaults.zIndex,
-      width: defaults.width,
+    $.fn.sticky = function( method ) {
+
+        if ( methods[method] ) {
+            return methods[method].apply( this, Array.prototype.slice.call( arguments, 1 ))
+        } else if ( typeof method === 'object' || ! method ) {
+            return methods.init.apply( this, arguments );
+        } else {
+            $.error( 'Method ' + method + ' does not exist on jQuery.sticky' );
+        }
     }
-    var unstickyCss = {
-        position: defaults.position,
-    }
 
-    var didScroll = false;
-
-    $(window).scroll(function() {
-      didScroll = true;
-    });
-
-
-    return this.each(function() {
-        var element = $(this),
-
-            // get the sticky element
-            sticky = $(element),
-
-            // clone it
-            clone = sticky.clone(),
-
-            // ...and its width
-            width = sticky.parent().width(),
-
-            // ...and its distance from document top
-            fromTop = sticky.offset().top,
-
-            isVisible = false;
-
-            clone.appendTo(sticky).css({width: width}).css(stickyCss).hide();
-
-            if ( (fromTop + defaults.buffer <= $(document).scrollTop() + defaults.top) ) {
-                if (isVisible == false) {
-                    isVisible = true;
-                    clone
-                        .show();
-                }
-
-            }
-
-        setInterval(function() {
-
-            if (didScroll) {
-                didScroll = false;
-                if ( (fromTop + defaults.buffer <= $(document).scrollTop() + defaults.top) ) {
-                    if (isVisible == false) {
-                        isVisible = true;
-                        clone.slideToggle("fast");
-                    }
-                }
-
-                else {
-                    if (isVisible == true) {
-
-                        isVisible = false;
-                        clone.slideToggle("fast");
-                    }
-                }
-            }
-            }, defaults.delay);
-        });
-  }
 })(jQuery);
