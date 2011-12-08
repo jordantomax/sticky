@@ -30,21 +30,25 @@
     },
     unstickyCss: {
       position: "static"
-    },
+    }
   },
   settings,
 
   // keeps track of the height
-  // of all sticky elements
+  // of all sticky elements on the page
   stickiesHeight = 0,
 
-  // variables for cached values
+  // cached values
   sticky = 'sticky',
   prefix = 'sticky',
   div = 'div';
 
-  /* HELPER METHODS
-  =========================== */
+
+  /////////////////////////////////
+
+  // HELPER METHODS
+
+  //////////////////////////////////
 
   // convience function for creating new jQuery objects
   // adapted from jquery.colorbox.js, jack@colorpowered.com
@@ -70,8 +74,74 @@
     $(element).appendTo($wrapper);
   }
 
-  /* PUBLIC METHODS
-  =========================== */
+  // the main update function 
+  function update() {
+
+    // avoid attaching events directly to the window
+    $(window).scroll(function() {
+      didScroll = true;
+    });
+
+    var
+    $this = $(this),
+    data = $.data(this, sticky),
+    didScroll = false;
+
+    console.log(data._width);
+    setInterval(function() {
+
+      if ( didScroll === true ) {
+        didScroll = false;
+
+        // if a sticky element in the flow changes size
+        // recalculate the offset of absolutely positioned sticky elements
+        if ( $this.parent().offset().top != data._offset ) {
+          data._offset = $this.parent().offset().top;
+        }
+
+        // if we scroll to the topCatch of our sticky elements
+        if ( data._offset - data.topCatch - settings.stickyCss.top <= $(document).scrollTop() ) {
+          $this.css( settings.stickyCss ).css( 'top', data.topCatch + settings.stickyCss.top );
+
+          if ( settings.fullWidth === true ) {
+            $this.css( "width", "100%" );
+          }
+
+          if ( settings.anchored === true && $this.height() + settings.stickyCss.top + data.topCatch + $(document).scrollTop() >= $(settings.anchoredTo).offset().top ) {
+            $this.addClass('anchored');
+            $this.parent().css({
+              height: "100%"
+            });
+            $this.css(settings.unstickyCss);
+            $this.css({
+              position: "absolute",
+              bottom: 15,
+              top: "auto",
+              zIndex: 999
+            });
+
+          } else if (settings.anchored === true && $this.hasClass('anchored')) {
+            $this.removeClass('anchored');
+            $this.css(settings.stickyCss).css( 'top', data.topCatch + settings.stickyCss.top );
+            $this.parent().css({
+              height: "auto"
+            });
+
+          }
+
+        } else {
+          $this.css( settings.unstickyCss );
+        }
+      }
+    }, settings.delay);
+  }
+
+  /////////////////////////////////
+
+  // PUBLIC METHODS
+
+  //////////////////////////////////
+  
 
   var methods = {
 
@@ -84,12 +154,13 @@
         var
         $this = $(this),
         data = $.data(this, sticky, {
-          offset: $this.offset().top,
-          height: $this.height(),
+          _offset: $this.offset().top,
+          _height: $this.height(),
+          _width: $this.width(),
           topCatch: 0
         });
 
-        // // if the plugin has not been initializated
+        // if the plugin has not been initializated
         if ( ! data ) {
 
           $this.data(this, sticky, {
@@ -101,20 +172,19 @@
 
         // set where our sticky elements will catch
         data.topCatch = stickiesHeight;
-        stickiesHeight += data.height;
+        stickiesHeight += data._height;
 
         // add wrapper with the height of our element
         // to prevent the page from jumping when we
         // fix the element's position
-        if ( settings.inFlow == true ) {
+        if ( settings.inFlow === true ) {
           wrapElement( this, {
             height: $this.height()
           });
 
         // add wrapper with same top position of our element
         // to keep a reference to the top offset
-        // in case it changes
-        } else if (  settings.absolute == true ) {
+        } else if ( settings.absolute === true ) {
           wrapElement( this, {
             position: "absolute",
             top: $this.css('top')
@@ -122,78 +192,20 @@
           $this.css('top', '0');
         }
 
-        methods.update.apply( this );
+        update.apply( this );
       });
-    },
-    update: function() {
-      var
-      $this = $(this),
-      data = $.data(this, sticky),
-      didScroll = false;
-      updateInterval = setInterval(function() {
-
-        // avoid attaching events directly to the window
-        $(window).scroll(function() {
-          didScroll = true;
-        })
-
-        if ( didScroll == true ) {
-          didScroll = false;
-
-          // if a sticky element in the flow changes size
-          // recalculate the offset of absolutely positioned sticky elements
-          if ( $this.parent().offset().top != data.offset ) {
-            data.offset = $this.parent().offset().top;
-          }
-
-          // if we scroll to the topCatch of our sticky elements
-          if ( data.offset - data.topCatch - settings.stickyCss.top <= $(document).scrollTop() ) {
-            console.log('caught the element', $this);
-            $this.css( settings.stickyCss ).css( 'top', data.topCatch + settings.stickyCss.top );
-
-            if ( settings.fullWidth == true ) {
-              $this.css( "width", "100%" );
-            }
-
-            if ( settings.anchored == true && $this.height() + settings.stickyCss.top + data.topCatch + $(document).scrollTop() >= $(settings.anchoredTo).offset().top ) {
-              $this.addClass('anchored');
-              $this.parent().css({
-                height: "100%"
-              });
-              $this.css(settings.unstickyCss);
-              $this.css({
-                position: "absolute",
-                bottom: 15,
-                top: "auto",
-                zIndex: 999,
-              });
-
-            } else if (settings.anchored == true && $this.hasClass('anchored')) {
-              $this.removeClass('anchored');
-              $this.css(settings.stickyCss).css( 'top', data.topCatch + settings.stickyCss.top );
-              $this.parent().css({
-                height: "auto"
-              })
-
-            }
-
-          } else {
-            $this.css( settings.unstickyCss );
-          }
-        }
-      }, settings.delay);
     }
   };
 
   $.fn.sticky = function( method ) {
 
     if ( methods[method] ) {
-      return methods[method].apply( this, Array.prototype.slice.call( arguments, 1 ))
+      return methods[method].apply( this, Array.prototype.slice.call( arguments, 1 ));
     } else if ( typeof method === 'object' || ! method ) {
       return methods.init.apply( this, arguments );
     } else {
-      $.error( 'Method ' + method + ' does not exist on jQuery.sticky' );
+      return $.error( 'Method ' + method + ' does not exist on jQuery.sticky' );
     }
-  }
+  };
 
   })(jQuery);
