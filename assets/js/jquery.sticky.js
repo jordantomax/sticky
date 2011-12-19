@@ -32,7 +32,6 @@
       position: "static"
     }
   },
-  settings,
 
   // keeps track of the height
   // of all sticky elements on the page
@@ -76,7 +75,6 @@
 
   // the main update function 
   function update() {
-
     // avoid attaching events directly to the window
     $(window).scroll(function() {
       didScroll = true;
@@ -85,11 +83,10 @@
     var
     $this = $(this),
     data = $.data(this, sticky),
+    settings = data._settings,
     didScroll = false;
 
-    console.log(data._width);
     setInterval(function() {
-
       if ( didScroll === true ) {
         didScroll = false;
 
@@ -147,17 +144,18 @@
 
     init: function( options ) {
 
-      settings = $.extend( true, {}, defaults, options );
+      var settings = $.extend( true, {}, defaults, options );
 
       return this.each(function(i) {
 
         var
         $this = $(this),
         data = $.data(this, sticky, {
-          _offset: $this.offset().top,
-          _height: $this.height(),
-          _width: $this.width(),
-          topCatch: 0
+            _settings: settings,    
+            _offset: $this.offset().top,
+            _height: $this.height(),
+            _width: $this.width(),
+            topCatch: 0
         });
 
         // if the plugin has not been initializated
