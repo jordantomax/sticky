@@ -1,25 +1,44 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <link href="assets/css/include.css" rel='stylesheet' type='text/css'>
-        <script src="assets/js/jquery-1.6.4.js"></script>
-        <script src="assets/js/jquery.sticky.js"></script>
-        <script src="assets/js/init.js"></script>
+
+        <link href="sticky.css" rel='stylesheet' type='text/css'>
+
+        <script src="jquery-1.6.4.js"></script>
+        <script src="jquery.sticky.js"></script>
 
         <meta http-equiv="Content-type" content="text/html; charset=utf-8">
         <title>Sticky</title>
+
+		<script type="text/javascript">
+
+			$(function() {
+
+				$('.black').sticky({
+					fromTop: 0
+				});
+
+				// call the plugin
+				$('.red').sticky({
+					fromTop: 10 
+				});
+
+
+			});
+
+		</script>
+
     </head>
     <body>
         <div class="header">
-            <div class="container-12">
-                <div class="grid-12 black">
+            <div class="wrapper">
+                <div class="sticky grid-12 black">
             </div>
         </div>
         <div class="content">
-            <div class="container-12">
+            <div class="wrapper">
                 <div class="grid-2">
-                    Content
-                    <div class="sticky red"></div>
+                    <div class="sticky red">content</div>
                 </div>
                 <div class="grid-10 grey">
                 <div>

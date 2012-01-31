@@ -152,6 +152,7 @@
 
 		// if we scroll to the topCatch of our sticky elements
 		if ( data._offset - data._topCatch - settings.fromTop <= $(document).scrollTop() ) {
+			console.log(this);
 
 			if (!data._isAnchored) {
 				$this.addClass('s-fixed');
